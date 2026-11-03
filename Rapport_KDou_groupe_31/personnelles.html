@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Requêtes personnelles – SAÉ S1-04 KDou</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="entete">
+    <div class="conteneur barre">
+      <a class="logo" href="index.html">KDou<span>SAÉ S1-04</span></a>
+      <nav class="menu"><a href="index.html">Contexte</a><a href="organisation.html">Organisation</a><a href="obligatoires.html">Requêtes obligatoires</a><a href="personnelles.html" class="active">Requêtes personnelles</a></nav>
+    </div>
+    <div class="bandeau"><div class="conteneur"><h1>Les requêtes personnelles</h1><p>Chaque membre propose un indicateur qui lui semble utile pour KDou : environnement, offre, rentabilité...</p></div></div>
+  </header>
+  <main class="conteneur">
+    <nav class="liens"><a href="#req-perso-1">Requête 1</a><a href="#req-perso-2">Requête 2</a><a href="#req-perso-3">Requête 3</a><a href="#req-perso-4">Requête 4</a><a href="#req-perso-5">Requête 5</a></nav>
+    <article class="requete" id="req-perso-1">
+      <header class="titre-requete">
+        <p class="theme">Requête personnelle 1</p>
+        <h2>Produits importés hors UE les moins rentables</h2>
+        <p class="auteur">Joshua Radjendirane</p>
+      </header>
+      <section>
+        <h3>Énoncé et objectif</h3>
+        <p>Quels sont les 5 produits importés hors Union européenne qui génèrent le moins de marge brute ?</p>
+        <p>Objectif : repérer les produits qui viennent de pays hors UE et qui rapportent le moins à KDou.</p>
+      </section>
+      <section>
+        <h3>Intérêt dans le contexte</h3>
+        <p>KDou veut une image éco-responsable. Les produits importés de très loin pèsent sur le transport. Ceux d’entre eux qui rapportent peu sont les premiers candidats à supprimer ou à remplacer par des produits européens ou français, ce qui améliore à la fois l’image et la rentabilité.</p>
+      </section>
+      <section>
+        <h3>Requête SQL</h3>
+        <pre><code>SELECT TOP 5 P.RefProd, P.NomProd, F.Societe, Y.PaysFR,
+Sum(D.[Quantité]) AS QuantiteTotaleVendue,
+Round(Sum(D.[Quantité] * (P.CoutAchat * C.CoefMarge * (1 - D.[Remise (%)]) - P.CoutAchat)), 2) AS MargeBruteTotale
+FROM (((Pays AS Y INNER JOIN Fournisseur AS F ON Y.NoPays = F.NoPays)
+INNER JOIN Produit AS P ON F.NoFour = P.NoFour)
+INNER JOIN Categorie AS C ON P.CodeCateg = C.CodeCateg)
+INNER JOIN DetailCommande AS D ON P.RefProd = D.[Réf produit]
+WHERE Y.UE = 'Hors'
+GROUP BY P.RefProd, P.NomProd, F.Societe, Y.PaysFR
+ORDER BY Sum(D.[Quantité] * (P.CoutAchat * C.CoefMarge * (1 - D.[Remise (%)]) - P.CoutAchat)), P.RefProd;</code></pre>
+        <h4>Explication de la conception</h4>
+        <p>La marge brute d’une ligne de commande est Quantité × (prix de vente après remise − coût d’achat), avec un prix de vente égal au coût d’achat × coefficient de marge de la catégorie. On relie Pays, Fournisseur, Produit, Categorie et DetailCommande, et on garde les pays dont la colonne UE vaut « Hors ». SUM donne la marge totale par produit, le tri croissant et TOP 5 gardent les 5 moins rentables.</p><p>Choix : un INNER JOIN avec DetailCommande, pour ne comparer que des produits qui ont été vendus. Avec un LEFT JOIN, les 20 produits hors UE jamais vendus (sur 62) auraient pris les 5 premières places avec 0 € de marge. J’affiche aussi la quantité vendue, parce qu’une marge faible peut venir d’un produit peu vendu ou d’une petite marge par unité.</p>
+      </section>
+      <section>
+        <h3>Résultat</h3>
+        <figure class="image">
+          <div class="tableau"><table><thead><tr><th scope="col">RefProd</th><th scope="col">NomProd</th><th scope="col">Societe</th><th scope="col">PaysFR</th><th scope="col">QuantiteTotaleVendue</th><th scope="col">MargeBruteTotale</th></tr></thead><tbody><tr><td>15</td><td>Genen Shouyu</td><td>Mayako Foods</td><td>Japon</td><td>185</td><td>2 176,46</td></tr><tr><td>66</td><td>Louisiana Hot Spiced Okra</td><td>Bayou pice Traders</td><td>Etats-Unis</td><td>263</td><td>3 442,51</td></tr><tr><td>3</td><td>Aniseed Syrup</td><td>Savannah Bay Spices Co.</td><td>Royaume-Uni</td><td>428</td><td>3 776,64</td></tr><tr><td>62</td><td>Sugar Pie</td><td>Délices de l'Érable</td><td>Canada</td><td>1291</td><td>4 003,05</td></tr><tr><td>67</td><td>Laughing Lumberjack Lager</td><td>Grizzly Hopworks Co.</td><td>Etats-Unis</td><td>280</td><td>4 329,80</td></tr></tbody></table></div>
+          <figcaption>Ces 5 produits dégagent entre 2 176 € et 4 330 € de marge brute totale. Sugar Pie (Canada) se vend beaucoup (1 291 unités) avec une marge par unité très faible, alors que Genen Shouyu (Japon) se vend peu (185 unités). Il faut donc regarder la quantité vendue avant de décider d’arrêter un produit.</figcaption>
+        </figure>
+      </section>
+    </article>
+    <article class="requete" id="req-perso-2">
+      <header class="titre-requete">
+        <p class="theme">Requête personnelle 2</p>
+        <h2>Produits qui contribuent le plus aux ventes</h2>
+        <p class="auteur">Vladyslav Latyshev</p>
+      </header>
+      <section>
+        <h3>Énoncé et objectif</h3>
+        <p>Classer les produits selon le montant total de leurs ventes, au prix de vente et après remise.</p>
+        <p>Objectif : savoir quels produits apportent le plus de chiffre d’affaires à KDou.</p>
+      </section>
+      <section>
+        <h3>Intérêt dans le contexte</h3>
+        <p>Cette requête permet à KDou d’identifier les produits qui contribuent le plus à son chiffre d’affaires. Elle aide l’entreprise à optimiser son offre, à mieux orienter ses achats et à adapter sa stratégie commerciale. Grâce à cet indicateur, KDou peut privilégier les produits les plus intéressants financièrement.</p>
+      </section>
+      <section>
+        <h3>Requête SQL</h3>
+        <pre><code>SELECT P.RefProd, P.NomProd,
+Sum(D.[Quantité] * P.CoutAchat * C.CoefMarge * (1 - D.[Remise (%)])) AS CATotal
+FROM (Categorie AS C INNER JOIN Produit AS P ON C.CodeCateg = P.CodeCateg)
+INNER JOIN DetailCommande AS D ON P.RefProd = D.[Réf produit]
+GROUP BY P.RefProd, P.NomProd
+ORDER BY Sum(D.[Quantité] * P.CoutAchat * C.CoefMarge * (1 - D.[Remise (%)])) DESC;</code></pre>
+        <h4>Explication de la conception</h4>
+        <p>On relie Categorie, Produit et DetailCommande. Pour chaque ligne de commande, le montant vendu est Quantité × coût d’achat × coefficient de marge × (1 − remise). SUM additionne ces montants par produit (GROUP BY), et le tri décroissant place les produits qui rapportent le plus en haut de la liste.</p>
+      </section>
+      <section>
+        <h3>Résultat</h3>
+        <figure class="image">
+          <div class="tableau"><table><thead><tr><th scope="col">RefProd</th><th scope="col">NomProd</th><th scope="col">CATotal</th></tr></thead><tbody><tr><td>38</td><td>Côte de Blaye</td><td>402 413,85</td></tr><tr><td>51</td><td>Manjimup Dried Apples</td><td>337 185,39</td></tr><tr><td>31</td><td>Gorgonzola Telino</td><td>224 265,46</td></tr><tr><td>60</td><td>Camembert Pierrot</td><td>222 359,69</td></tr><tr><td>32</td><td>Mascarpone Fabioli</td><td>213 470,40</td></tr></tbody></table></div>
+          <figcaption>La Côte de Blaye est le produit qui rapporte le plus (environ 402 000 €), devant les Manjimup Dried Apples (337 000 €) et le Gorgonzola Telino (224 000 €). Les 5 premiers produits à eux seuls dépassent 1,3 million d’euros de ventes.</figcaption>
+        </figure>
+      </section>
+    </article>
+    <article class="requete" id="req-perso-3">
+      <header class="titre-requete">
+        <p class="theme">Requête personnelle 3</p>
+        <h2>Valeur du stock par fournisseur</h2>
+        <p class="auteur">Mouheb Maiel</p>
+      </header>
+      <section>
+        <h3>Énoncé et objectif</h3>
+        <p>Afficher pour chaque fournisseur le nombre de produits qu’il propose au catalogue de KDou,
+           ainsi que la valeur totale de son stock actuel 
+           (calculée par le produit entre la quantité en stock et le coût d’achat).</p>
+      </section>
+      <section>
+        <h3>Intérêt dans le contexte</h3>
+        <p>Cette requête permet aux associés de KDou d’identifier rapidement quels fournisseurs pèsent le plus lourd financièrement dans les stocks de l’entreprise. 
+          Cela aide à optimiser la trésorerie, 
+          à mieux négocier les volumes d’achat et à identifier les partenaires stratégiques pour l’approvisionnement.</p>
+      </section>
+      <section>
+        <h3>Requête SQL</h3>
+        <pre><code>
+          SELECT F.Societe, COUNT(P.RefProd) AS NbProduits,SUM(P.UnitStock * P.CoutAchat) AS ValeurStockTotal
+          FROM Fournisseur AS F
+          INNER JOIN Produit AS P ON F.NoFour = P.NoFour
+          GROUP BY F.Societe
+          ORDER BY SUM(P.UnitStock * P.CoutAchat) DESC;
+   </code></pre>
+        <h4>Explication de la conception</h4>
+        <p>On joins Fournisseur et Produit, puis on regroupe par fournisseur.
+           COUNT donne le nombre de produits et SUM(UnitStock × CoutAchat) la valeur du stock. 
+          Le tri décroissant place les fournisseurs les plus lourds en haut de la liste.</p>
+      </section>
+      <section>
+        <h3>Résultat</h3>
+        <figure class="image">
+          <img src="assets/img/requète_perso_1.png" alt="Résultat de la requête personnelle du membre Mouheb">
+          <figcaption>TanteGreta Handelsgruppe AG est le fournisseur qui pèse le plus dans le stock : 6 produits pour une valeur de 15 621,54 €, devant SkandiDelikat AB (5 produits, 14 335,00 €) et Le Panier du Coin (2 produits, 9 000,37 €).</figcaption>
+        </figure>
+      </section>
+    </article>
+    <article class="requete" id="req-perso-4">
+      <header class="titre-requete">
+        <p class="theme">Requête personnelle 4</p>
+        <h2>Produits carnés qui ne se vendent pas (NOT EXISTS)</h2>
+        <p class="auteur">Maeckel Malumba</p>
+      </header>
+      <section>
+        <h3>Énoncé et objectif</h3>
+        <p>Compter les produits carnés qui n’ont jamais été commandés, en utilisant NOT EXISTS.</p>
+        <p>Objectif : repérer les produits de la catégorie « Viandes » sans aucune vente.</p>
+      </section>
+      <section>
+        <h3>Intérêt dans le contexte</h3>
+        <p>Cette requête permet d’identifier les produits carnés qui ne se vendent pas afin d’adapter l’offre, limiter les stocks inutiles et réduire le gaspillage alimentaire.</p>
+      </section>
+      <section>
+        <h3>Requête SQL</h3>
+        <pre><code>SELECT Count(P.RefProd) AS NbProduitsCarnesNonCommandes
+FROM Produit AS P
+INNER JOIN Categorie AS C ON P.CodeCateg = C.CodeCateg
+WHERE C.NomCateg = 'Viandes'
+AND NOT EXISTS (
+  SELECT *
+  FROM DetailCommande AS D
+  WHERE D.[Réf produit] = P.RefProd
+);</code></pre>
+        <h4>Explication de la conception</h4>
+        <p>On relie Produit à Categorie pour ne garder que la catégorie « Viandes ». La sous-requête avec NOT EXISTS cherche s’il existe une ligne de DetailCommande pour le produit en cours (D.[Réf produit] = P.RefProd) : si aucune n’existe, le produit est compté par COUNT. C’est une autre façon d’écrire la requête obligatoire 4, qui utilise NOT IN.</p>
+      </section>
+      <section>
+        <h3>Résultat</h3>
+        <figure class="image">
+          <div class="tableau"><table><thead><tr><th scope="col">NbProduitsCarnesNonCommandes</th></tr></thead><tbody><tr><td>2</td></tr></tbody></table></div>
+          <figcaption>Le résultat est 2 : deux produits carnés n’ont jamais été commandés, ce qui correspond au résultat de la requête obligatoire 4.</figcaption>
+        </figure>
+      </section>
+    </article>
+    <article class="requete" id="req-perso-5">
+      <header class="titre-requete">
+        <p class="theme">Requête personnelle 5</p>
+        <h2>Nombre de commandes par ville</h2>
+        <p class="auteur">Clément Fontaine</p>
+      </header>
+      <section>
+        <h3>Énoncé et objectif</h3>
+        <p>Combien de commandes chaque ville a-t-elle passé, classées de la ville qui commande le plus à celle qui commande le moins ?</p>
+        <p>Objectif : repérer les villes où KDou livre le plus souvent.</p>
+      </section>
+      <section>
+        <h3>Intérêt dans le contexte</h3>
+        <p>Plus il y a de commandes dans une même ville, plus il est facile de regrouper les livraisons dans un seul trajet. Moins de trajets veut dire moins de carburant et moins de pollution, ce qui va dans le sens de l’image éco-responsable de KDou. Cela aide aussi à organiser les tournées de livraison.</p>
+      </section>
+      <section>
+        <h3>Requête SQL</h3>
+        <pre><code>SELECT Trim(Cl.Ville) AS VilleClient, Count(Cmd.[N° commande]) AS NbCommandes
+FROM Clientele AS Cl INNER JOIN Commande AS Cmd ON Cl.CodeCli = Cmd.CodeCli
+GROUP BY Trim(Cl.Ville)
+ORDER BY Count(Cmd.[N° commande]) DESC;</code></pre>
+        <h4>Explication de la conception</h4>
+        <p>La ville est dans la table Clientele et les commandes dans la table Commande, donc on les relie avec le code client (CodeCli). On regroupe ensuite par ville avec GROUP BY et on compte les commandes avec COUNT. Le tri décroissant met en haut les villes qui commandent le plus. La fonction TRIM enlève les espaces en trop à la fin du nom de la ville : certaines villes de la base, comme « Marseille », sont écrites avec un espace en plus et seraient sinon comptées à part.</p>
+      </section>
+      <section>
+        <h3>Résultat</h3>
+        <figure class="image">
+          <div class="tableau"><table><thead><tr><th scope="col">VilleClient</th><th scope="col">NbCommandes</th></tr></thead><tbody><tr><td>Paris</td><td>159</td></tr><tr><td>Lille</td><td>134</td></tr><tr><td>Marseille</td><td>111</td></tr><tr><td>Lyon</td><td>106</td></tr><tr><td>Toulouse</td><td>80</td></tr></tbody></table></div>
+          <figcaption>Paris est en tête avec 159 commandes, devant Lille (134), Marseille (111), Lyon (106) et Toulouse (80). Ces 5 villes regroupent 590 des 1 083 commandes, soit un peu plus de la moitié : ce sont les premières villes où regrouper les livraisons.</figcaption>
+        </figure>
+      </section>
+    </article>
+  </main>
+  <footer class="pied">
+    <div class="conteneur">
+      <p>SAÉ S1-04 – Conception et interrogation d’une base de données · BUT Informatique · IUT de Paris – Rives de Seine</p>
+      <p>Groupe 31 · 2026 · Mouheb Maiel, Joshua Radjendirane, Clément Fontaine, Vladyslav Latyshev, Maeckel Malumba</p>
+    </div>
+  </footer>
+</body>
+</html>

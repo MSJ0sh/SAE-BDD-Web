@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contexte – SAÉ S1-04 KDou</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="entete">
+    <div class="conteneur barre">
+      <a class="logo" href="index.html">KDou<span>SAÉ S1-04</span></a>
+      <nav class="menu"><a href="index.html" class="active">Contexte</a><a href="organisation.html">Organisation</a><a href="obligatoires.html">Requêtes obligatoires</a><a href="personnelles.html">Requêtes personnelles</a></nav>
+    </div>
+    <div class="bandeau"><div class="conteneur"><h1>KDou, l’épicerie fine qui veut verdir son image</h1><p>Rapport collectif : analyser les données de l’entreprise en SQL pour l’aider à devenir plus éco-responsable et plus rentable.</p></div></div>
+  </header>
+  <main class="conteneur">
+    <section class="partie">
+      <h2>La mission</h2>
+      <p>KDou est une entreprise d’épicerie fine : elle achète des produits alimentaires typiques à des fournisseurs du monde entier et les vend à des clients situés en France. Elle s’interroge sur sa rentabilité, sur sa place face à ses concurrents et souhaite renforcer son image d’entreprise éco-responsable.</p>
+      <p>Notre équipe accompagne KDou : nous analysons ses données avec le langage SQL, puis nous proposons des indicateurs qui l’aident à construire une image « éco-friendly » sans perdre en rentabilité.</p>
+      <p>Concrètement, KDou achète des produits d’épicerie fine à des fournisseurs de plusieurs pays et les revend à des clients en France. L’entreprise veut savoir si elle est assez rentable, mieux se placer face à ses concurrents et améliorer son image éco-responsable. Notre rôle est d’analyser ses données avec SQL et de lui proposer des indicateurs clairs pour décider.</p>
+    </section>
+    <section class="partie encadre">
+      <h2>Ce que présente ce site</h2>
+      <p>Ce site web est le rapport collectif de notre SAÉ S1-04. Il présente le travail réalisé en SQL sur la base de données de KDou : les <a href="obligatoires.html">4 requêtes obligatoires</a> et les <a href="personnelles.html">5 requêtes personnelles</a> (une par membre du groupe), ainsi que notre <a href="organisation.html">organisation de travail</a>.</p>
+      <p>Nous avons travaillé avec Microsoft Access pour la base de données et les requêtes SQL, et avec HTML et CSS pour ce site. Ce travail s’inscrit dans la SAÉ S1.04, liée aux ressources R1.05 (introduction aux bases de données et SQL), R1.09 (économie durable et numérique) et R1.02 (développement d’interface web).</p>
+    </section>
+    <section class="partie">
+      <h2>La base de données de KDou</h2>
+      <p>Un client passe plusieurs commandes, chaque commande concerne un ou plusieurs produits, et chaque produit appartient à une seule catégorie et à un seul fournisseur. Le prix de vente est le coût d’achat multiplié par le coefficient de marge de la catégorie. Certains clients pilotent un réseau de clients partenaires pour des livraisons groupées.</p>
+      <div class="tableau">
+        <table>
+          <caption>Les tables de la base KDouSAE2026</caption>
+          <thead><tr><th scope="col">Table</th><th scope="col">Champs principaux</th><th scope="col">Rôle</th></tr></thead>
+          <tbody><tr><td>Clientele</td><td>CodeCli (clé), Societe, Contact, CodeCliPart, NoPays, Adresse, Ville, CodePostal, Tel, MailCli</td><td>Clients de KDou, tous en France ; CodeCliPart relie un client à son client pilote</td></tr><tr><td>Commande</td><td>N° commande (clé), CodeCli, DateCde, AlivAv, dateEnv, Port</td><td>Commandes passées par les clients</td></tr><tr><td>DetailCommande</td><td>N° commande, Réf produit, Quantité, Remise (%)</td><td>Produits de chaque commande</td></tr><tr><td>Produit</td><td>RefProd (clé), NoFour, CodeCateg, NomProd, QteParUnit, CoutAchat, UnitStock</td><td>Catalogue : un fournisseur et une catégorie par produit</td></tr><tr><td>Fournisseur</td><td>NoFour (clé), Societe, Contact, Fonction, Adresse, Ville, Region, CP, NoPays, Tel</td><td>Fournisseurs situés dans le monde entier</td></tr><tr><td>Categorie</td><td>CodeCateg (clé), NomCateg, Description, CoefMarge</td><td>Catégories alimentaires et coefficient de marge</td></tr><tr><td>Pays</td><td>NoPays (clé), PaysFR, PaysEN, Capitale, CodeISO, Devise, UE</td><td>Table des pays, avec l’appartenance à l’UE</td></tr></tbody>
+        </table>
+      </div>
+      <figure class="image">
+        <img src="assets/img/relation table.png" alt="Schéma des relations de la base de données KDou"> 
+
+        <figcaption>Schéma des relations de la base KDou</figcaption>
+      </figure>
+    </section>
+    <section class="partie">
+      <h2>Nos axes de réflexion</h2>
+      <ul class="liste">
+        <li><strong>Origine des produits</strong>Le poids des fournisseurs de l’Union européenne dans le chiffre d’affaires.</li>
+        <li><strong>Santé</strong>Les ventes de desserts et de boissons, année par année.</li>
+        <li><strong>Offre commerciale</strong>Les produits carnés qui ne sont pas commandés.</li>
+        <li><strong>Partenariat client</strong>Les clients pilotes et leur réseau de partenaires.</li>
+      </ul>
+    </section>
+  </main>
+  <footer class="pied">
+    <div class="conteneur">
+      <p>SAÉ S1-04 – Conception et interrogation d’une base de données · BUT Informatique · IUT de Paris – Rives de Seine</p>
+      <p>Groupe 31 · 2026 · Mouheb Maiel, Joshua Radjendirane, Clément Fontaine, Vladyslav Latyshev, Maeckel Malumba</p>
+    </div>
+  </footer>
+</body>
+</html>
